@@ -3,6 +3,9 @@ import fetch from 'node-fetch'
 import tcpp from 'tcp-ping'
 import redis from 'redis'
 import qs from 'querystring'
+import join from 'url-join'
+import { introspectSchema } from 'graphql-tools'
+import { HttpLink } from 'apollo-link-http'
 
 function probe(hostname, port) {
   return new Promise((resolve, reject) => {
@@ -95,6 +98,25 @@ export const mftCheck = sftp => (
   })
 )
 
+export const graphqlCheck = async (url, endpoints) => {
+  try {
+    const response = await apiCheck(url)
+    if (!response) return false
+
+    const promises = endpoints.map(async (endpoint) => {
+      const link = new HttpLink({ uri: join(url, endpoint), fetch })
+      const schema = await introspectSchema(link)
+      return schema
+    })
+
+    await Promise.all(promises)
+
+    return true
+  } catch (err) {
+    return false
+  }
+}
+
 export default params => async (req, res) => {
   const dependencies = Object.entries(params).filter(x => x[1].type)
   const statics = Object.entries(params).filter(x => !x[1].type)
@@ -108,6 +130,7 @@ export default params => async (req, res) => {
       case 'redis': return redisCheck(value.hostname)
       case 'cityworks': return cityworksCheck(value.url, value.token)
       case 'mft': return mftCheck(value.client)
+      case 'graphql': return graphqlCheck(value.url, value.endpoints)
 
       default: return Promise.reject()
     }
