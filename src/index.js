@@ -118,32 +118,45 @@ export const graphqlCheck = async (url, endpoints) => {
 }
 
 export default params => async (req, res) => {
-  const dependencies = Object.entries(params).filter(x => x[1].type)
-  const statics = Object.entries(params).filter(x => !x[1].type)
+  // convert params object to an array of object for convenience
+  const dependencies = Object
+    .entries(params)
+    .map(([property, value]) => ({ name: property, ...value }))
+  const dynamics = dependencies.filter(x => x.type)
+  const statics = dependencies.filter(x => !x.type)
 
-  const promises = dependencies.map(([property, value]) => {
-    switch (value.type) {
-      case 'mongo': return mongoCheck(value.instance)
-      case 'oracle': return oracleCheck(value.instance)
-      case 'api': return apiCheck(value.url)
-      case 'exchange': return exchangeCheck(value.hostname)
-      case 'redis': return redisCheck(value.hostname)
-      case 'cityworks': return cityworksCheck(value.url, value.token)
-      case 'mft': return mftCheck(value.client)
-      case 'graphql': return graphqlCheck(value.url, value.endpoints)
+  const statuses = await Promise.all(dynamics.map((x) => {
+    switch (x.type) {
+      case 'mongo': return mongoCheck(x.instance)
+      case 'oracle': return oracleCheck(x.instance)
+      case 'api': return apiCheck(x.url)
+      case 'exchange': return exchangeCheck(x.hostname)
+      case 'redis': return redisCheck(x.hostname)
+      case 'cityworks': return cityworksCheck(x.url, x.token)
+      case 'mft': return mftCheck(x.client)
+      case 'graphql': return graphqlCheck(x.url, x.endpoints)
 
       default: return Promise.reject()
     }
-  })
+  }))
 
-  const statuses = await Promise.all(promises)
+  // dependencies are dynamics with statuses
+  const dependenciesWithStatus = dynamics.map((x, i) => ({ ...x, status: statuses[i] }))
+  const staticsObject = statics.reduce((acc, x) => ({ ...acc, [x.name]: x.status }), {})
+  const requiredDependenciesObject = dependenciesWithStatus.reduce((acc, x) => (
+    x.optional ? acc : { ...acc, [x.name]: x.status }
+  ), {})
+  const optionalDependenciesObject = dependenciesWithStatus.reduce((acc, x) => (
+    x.optional ? { ...acc, [x.name]: x.status } : acc
+  ), {})
 
-  const dependenciesObject = dependencies
-    .reduce((acc, x, i) => ({ ...acc, [x[0]]: statuses[i] }), {})
-  const staticsObject = statics
-    .reduce((acc, x) => ({ ...acc, [x[0]]: x[1] }), {})
-  const health = { ...dependenciesObject, ...staticsObject }
-  const status = statuses.every(x => x) ? OK : SERVICE_UNAVAILABLE
+  let health = { ...staticsObject, ...requiredDependenciesObject }
+  if (dependenciesWithStatus.some(x => x.optional)) {
+    health = { ...health, optional: optionalDependenciesObject }
+  }
+  const status = dependenciesWithStatus.filter(x => !x.optional).every(x => x.status)
+    ? OK
+    : SERVICE_UNAVAILABLE
 
   res.status(status).json(health)
 }
