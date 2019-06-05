@@ -121,7 +121,10 @@ export default params => async (req, res) => {
   // convert params object to an array of object for convenience
   const dependencies = Object
     .entries(params)
-    .map(([property, value]) => ({ name: property, ...value }))
+    .map(([property, value]) => (typeof value === 'object'
+      ? ({ name: property, ...value })
+      : ({ name: property, value })
+    ))
   const dynamics = dependencies.filter(x => x.type)
   const statics = dependencies.filter(x => !x.type)
 
@@ -142,7 +145,7 @@ export default params => async (req, res) => {
 
   // dependencies are dynamics with statuses
   const dependenciesWithStatus = dynamics.map((x, i) => ({ ...x, status: statuses[i] }))
-  const staticsObject = statics.reduce((acc, x) => ({ ...acc, [x.name]: x.status }), {})
+  const staticsObject = statics.reduce((acc, x) => ({ ...acc, [x.name]: x.value }), {})
   const requiredDependenciesObject = dependenciesWithStatus.reduce((acc, x) => (
     x.optional ? acc : { ...acc, [x.name]: x.status }
   ), {})

@@ -1,6 +1,6 @@
 {
   "name": "@cityofsurrey/doctor-zhivago",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Basic Health Check For API Microservices",
   "main": "./lib/index.js",
   "scripts": {
