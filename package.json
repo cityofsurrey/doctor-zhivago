@@ -1,11 +1,11 @@
 {
   "name": "@cityofsurrey/doctor-zhivago",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "Basic Health Check For API Microservices",
   "main": "./lib/src/index.js",
   "scripts": {
     "prepublish": "yarn build",
-    "build": "babel . --out-dir ./lib/ --ignore ./node_modules/",
+    "build": "babel ./src/index.js --out-dir ./lib/ --ignore ./node_modules/",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint ."
   },
