@@ -31,13 +31,13 @@
   },
   "homepage": "https://github.com/cityofsurrey/doctor-zhivago#readme",
   "dependencies": {
-    "apollo-link-http": "^1.5.16",
-    "graphql-tools": "^4.0.6",
-    "http-status": "^1.4.2",
-    "node-fetch": "^2.6.0",
-    "redis": "^2.8.0",
-    "tcp-ping": "^0.1.1",
-    "url-join": "^4.0.1"
+    "apollo-link-http": "1.5.16",
+    "graphql-tools": "4.0.6",
+    "http-status": "1.4.2",
+    "node-fetch": "2.6.0",
+    "redis": "2.8.0",
+    "tcp-ping": "0.1.1",
+    "url-join": "4.0.1"
   },
   "devDependencies": {
     "@babel/cli": "7.7.5",
@@ -70,7 +70,7 @@
     "eslint-plugin-import": "2.18.2",
     "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-react": "7.17.0",
-    "eslint-plugin-react-hooks": "^2.3.0"
+    "eslint-plugin-react-hooks": "2.3.0"
   },
   "directories": {
     "lib": "lib"

@@ -29,7 +29,7 @@ export const apiCheck = async (url) => {
   }
 }
 
-export const mongoCheck = async mongoose => mongoose.connection.readyState === 1
+export const mongoCheck = async (mongoose) => mongoose.connection.readyState === 1
 
 export const oracleCheck = async (oracledb) => {
   try {
@@ -82,7 +82,7 @@ export const cityworksCheck = async (url, token) => {
   }
 }
 
-export const mftCheck = sftp => (
+export const mftCheck = (sftp) => (
   new Promise((resolve) => {
     if (sftp.client) {
       sftp.client.readdir('/', (err) => {
@@ -117,7 +117,7 @@ export const graphqlCheck = async (url, endpoints) => {
   }
 }
 
-export default params => async (req, res) => {
+export default (params) => async (req, res) => {
   // convert params object to an array of object for convenience
   const dependencies = Object
     .entries(params)
@@ -125,8 +125,8 @@ export default params => async (req, res) => {
       ? ({ name: property, ...value })
       : ({ name: property, value })
     ))
-  const dynamics = dependencies.filter(x => x.type)
-  const statics = dependencies.filter(x => !x.type)
+  const dynamics = dependencies.filter((x) => x.type)
+  const statics = dependencies.filter((x) => !x.type)
 
   const statuses = await Promise.all(dynamics.map((x) => {
     switch (x.type) {
@@ -154,10 +154,10 @@ export default params => async (req, res) => {
   ), {})
 
   let health = { ...staticsObject, ...requiredDependenciesObject }
-  if (dependenciesWithStatus.some(x => x.optional)) {
+  if (dependenciesWithStatus.some((x) => x.optional)) {
     health = { ...health, optional: optionalDependenciesObject }
   }
-  const status = dependenciesWithStatus.filter(x => !x.optional).every(x => x.status)
+  const status = dependenciesWithStatus.filter((x) => !x.optional).every((x) => x.status)
     ? OK
     : SERVICE_UNAVAILABLE
 
