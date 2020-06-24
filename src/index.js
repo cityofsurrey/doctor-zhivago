@@ -51,9 +51,9 @@ export const exchangeCheck = async (hostname) => {
   }
 }
 
-export const redisCheck = async (hostname) => {
+export const redisCheck = async (hostname, port = 6379) => {
   try {
-    const client = redis.createClient(6379, hostname)
+    const client = redis.createClient(port, hostname)
     client.on('error', (err) => {
       client.quit()
       throw err
