@@ -134,7 +134,7 @@ export default (params) => async (req, res) => {
       case 'oracle': return oracleCheck(x.instance)
       case 'api': return apiCheck(x.url)
       case 'exchange': return exchangeCheck(x.hostname)
-      case 'redis': return redisCheck(x.hostname)
+      case 'redis': return redisCheck(x.hostname, x.port, x.options)
       case 'cityworks': return cityworksCheck(x.url, x.token)
       case 'mft': return mftCheck(x.client)
       case 'graphql': return graphqlCheck(x.url, x.endpoints)
